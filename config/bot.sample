@@ -1,0 +1,6 @@
+[tg_bot]
+token = *YOUR TOKEN*
+
+[admin_ids]
+admin_id = *ID*
+admin_group_id = *CHAT_ID*

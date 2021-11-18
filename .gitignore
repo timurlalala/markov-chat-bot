@@ -1,0 +1,8 @@
+# Default ignored files
+.idea/
+app/__pycache__
+app/ids.txt
+app/handlers/__pycache__
+config/bot.ini
+database/__pycache__
+database/messages.db
