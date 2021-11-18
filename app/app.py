@@ -7,7 +7,7 @@ from aiogram.utils import executor
 from app.configr_reader import load_config
 from app.handlers.service_commands import register_commands_handlers
 from app.handlers.dialog_behavior import register_message_handlers
-from app.markov import MarkovManager
+from app.model import Manager
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,7 +16,7 @@ config = load_config("config/bot.ini")
 bot = Bot(token=config.tg_bot.token)
 dp = Dispatcher(bot)
 
-active = MarkovManager()
+active = Manager()
 
 
 def run():

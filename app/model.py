@@ -17,9 +17,8 @@ class Markov:
         self.N = self.windows[0]
         self.last_text = ' ' * self.N
         self.rand_coeff = rand_coeff
-        self.answer_chance = 1
 
-    def __make_pairs(self, text):
+    def _make_pairs(self, text):
         """
         Makes pairs
         """
@@ -48,7 +47,7 @@ class Markov:
         """
         Parses text and adds to statistic matrix
         """
-        for i in self.__make_pairs(text):
+        for i in self._make_pairs(text):
             try:
                 self.matrix[i[0]][i[1]] += 1
             except KeyError:
@@ -57,7 +56,7 @@ class Markov:
                 except KeyError:
                     self.matrix[i[0]] = {i[1]: 1}
 
-    def __get_primer(self):
+    def _get_primer(self):
         """
         Returns first characters of text to elongate
         """
@@ -69,7 +68,7 @@ class Markov:
                         \nБот учится на ваших сообщениях, напишите что-нибудь!'
         return primer
 
-    def __elongate(self, primer, ignore_none=False, strict=False):
+    def _elongate(self, primer, ignore_none=False, strict=False):
         """
         Elongates the given primer by 1 char
         Returns elongated string and is_end_of_text (True/False)
@@ -101,52 +100,75 @@ class Markov:
                 continue
         else:
             if strict is True:
-                return primer + self.__get_primer(), False
+                return primer + self._get_primer(), False
             else:
                 return primer, True
 
-    def generate_l(self, string=None, do_return=True, lengthmin=1, lengthmax=500):
+    def generate_l(self, string=None, lengthmin=1, lengthmax=500):
+        """
+        Generates text from primer string (if given) with specified max and min length
+        """
         length = random.randint(lengthmin, lengthmax)
         if string is None:
-            string = self.__get_primer()
+            string = self._get_primer()
         is_end_of_text = False
         for _ in range(length):
-            string, is_end_of_text = self.__elongate(string, ignore_none=random.choice([True, False]))
+            string, is_end_of_text = self._elongate(string, ignore_none=random.choice([True, False]))
         else:
             while (string[-1] not in ['.', '!', '?']) and (is_end_of_text is False):
-                string, is_end_of_text = self.__elongate(string)
-        if do_return:
-            return string
-        else:
-            print(string)
+                string, is_end_of_text = self._elongate(string)
+        return string
 
-    def generate(self, string=None, do_return=True):
+    def generate(self, string=None, **kwargs):
+        """
+        Generates text from primer string (if given)
+        """
         if string is None:
-            string = self.__get_primer()
+            string = self._get_primer()
         is_end_of_text = False
         while is_end_of_text is False:
-            string, is_end_of_text = self.__elongate(string)
-        if do_return:
-            return string
-        else:
-            print(string)
+            string, is_end_of_text = self._elongate(string, **kwargs)
+        return string
 
-    def generate_answer(self, message, do_return=True):
+    # def generate_answer(self, message):
+    #     """
+    #     Generates an answer, takes message text as primer
+    #     """
+    #     message += ' '
+    #     for n in self.windows:
+    #         if len(message) < n:
+    #             continue
+    #         else:
+    #             string = message[-n:]
+    #             is_end_of_text = False
+    #             while is_end_of_text is False:
+    #                 string, is_end_of_text = self._elongate(string, strict=True)
+    #             string = string[n:]
+    #             return string
+
+
+class Model(Markov):
+    """
+    order - number of characters in window,
+    rand_coeff - random coefficient
+    """
+    def __init__(self, order=None, rand_coeff=10):
+        super().__init__(order, rand_coeff)
+        self.answer_chance = 1
+
+    def generate_answer(self, message):
+        """
+        Generates an answer text, takes message as primer
+        """
         message += ' '
         for n in self.windows:
             if len(message) < n:
                 continue
             else:
                 string = message[-n:]
-                is_end_of_text = False
-                while is_end_of_text is False:
-                    string, is_end_of_text = self.__elongate(string, strict=True)
+                string = self.generate(string=string, strict=True)
                 string = string[n:]
-                if do_return:
-                    return string
-                else:
-                    print(string)
-                break
+                return string
 
     def set_rand_coeff(self, rand_coeff):
         self.rand_coeff = rand_coeff
@@ -157,7 +179,7 @@ class Markov:
         return "Успешно"
 
 
-class MarkovManager:
+class Manager:
 
     def __init__(self):
         self.models = {}
@@ -167,7 +189,7 @@ class MarkovManager:
         cursor = conn.cursor()
         cursor.execute(*query)
 
-        self.models[modelname] = Markov(**kwargs)
+        self.models[modelname] = Model(**kwargs)
         logging.info(f'Parsing {path}: Started...')
         for elem in [i[0] for i in cursor.fetchall()]:
             self.models[modelname].parse_and_add(elem)
