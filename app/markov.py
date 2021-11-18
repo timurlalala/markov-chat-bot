@@ -6,7 +6,7 @@ import sqlite3
 class Markov:
     """
     order - number of characters in window,
-    matrix - statistic dict
+    rand_coeff - random coefficient
     """
     def __init__(self, order=None, rand_coeff=10):
         self.matrix = {}
@@ -17,8 +17,9 @@ class Markov:
         self.N = self.windows[0]
         self.last_text = ' ' * self.N
         self.rand_coeff = rand_coeff
+        self.answer_chance = 1
 
-    def _make_pairs(self, text):
+    def __make_pairs(self, text):
         """
         Makes pairs
         """
@@ -47,7 +48,7 @@ class Markov:
         """
         Parses text and adds to statistic matrix
         """
-        for i in self._make_pairs(text):
+        for i in self.__make_pairs(text):
             try:
                 self.matrix[i[0]][i[1]] += 1
             except KeyError:
@@ -56,7 +57,7 @@ class Markov:
                 except KeyError:
                     self.matrix[i[0]] = {i[1]: 1}
 
-    def _get_primer(self):
+    def __get_primer(self):
         """
         Returns first characters of text to elongate
         """
@@ -68,7 +69,7 @@ class Markov:
                         \nБот учится на ваших сообщениях, напишите что-нибудь!'
         return primer
 
-    def _elongate(self, primer, ignore_none=False, strict=False):
+    def __elongate(self, primer, ignore_none=False, strict=False):
         """
         Elongates the given primer by 1 char
         Returns elongated string and is_end_of_text (True/False)
@@ -100,20 +101,20 @@ class Markov:
                 continue
         else:
             if strict is True:
-                return primer + self._get_primer(), False
+                return primer + self.__get_primer(), False
             else:
                 return primer, True
 
     def generate_l(self, string=None, do_return=True, lengthmin=1, lengthmax=500):
         length = random.randint(lengthmin, lengthmax)
         if string is None:
-            string = self._get_primer()
+            string = self.__get_primer()
         is_end_of_text = False
         for _ in range(length):
-            string, is_end_of_text = self._elongate(string, ignore_none=random.choice([True, False]))
+            string, is_end_of_text = self.__elongate(string, ignore_none=random.choice([True, False]))
         else:
             while (string[-1] not in ['.', '!', '?']) and (is_end_of_text is False):
-                string, is_end_of_text = self._elongate(string)
+                string, is_end_of_text = self.__elongate(string)
         if do_return:
             return string
         else:
@@ -121,10 +122,10 @@ class Markov:
 
     def generate(self, string=None, do_return=True):
         if string is None:
-            string = self._get_primer()
+            string = self.__get_primer()
         is_end_of_text = False
         while is_end_of_text is False:
-            string, is_end_of_text = self._elongate(string)
+            string, is_end_of_text = self.__elongate(string)
         if do_return:
             return string
         else:
@@ -139,13 +140,21 @@ class Markov:
                 string = message[-n:]
                 is_end_of_text = False
                 while is_end_of_text is False:
-                    string, is_end_of_text = self._elongate(string, strict=True)
+                    string, is_end_of_text = self.__elongate(string, strict=True)
                 string = string[n:]
                 if do_return:
                     return string
                 else:
                     print(string)
                 break
+
+    def set_rand_coeff(self, rand_coeff):
+        self.rand_coeff = rand_coeff
+        return "Успешно"
+
+    def set_answer_chance(self, answer_chance):
+        self.answer_chance = answer_chance/100
+        return "Успешно"
 
 
 class MarkovManager:
@@ -165,14 +174,14 @@ class MarkovManager:
         logging.info(f'Parsing {path}: Completed')
         logging.info(f'Model is ready')
 
-    def check_model_exists(self, chatid):
-        try:
-            self.models[chatid]
-        except KeyError:
-            self.init_chat_model(chatid)
-
     def init_chat_model(self, chatid):
         self.init_model(chatid,
                         r'database\messages.db',
                         '''SELECT message FROM texts WHERE userid = :userid''',
                         {'userid': chatid})
+
+    def check_model_exists(self, chatid):
+        try:
+            self.models[chatid]
+        except KeyError:
+            self.init_chat_model(chatid)

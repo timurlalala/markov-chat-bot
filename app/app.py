@@ -5,7 +5,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 
 from app.configr_reader import load_config
-from app.handlers.common_commands import register_commands_handlers
+from app.handlers.service_commands import register_commands_handlers
 from app.handlers.dialog_behavior import register_message_handlers
 from app.markov import MarkovManager
 
