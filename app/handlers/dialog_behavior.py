@@ -3,31 +3,30 @@ from aiogram.dispatcher import filters
 
 import app.app as app
 import database.db as db
-from app.markov import active
 
 
 async def command_anek(message: types.Message):
-    text = active.models['Aneks'].generate_l()
+    text = app.active.models['Aneks'].generate_l()
     await app.bot.send_message(chat_id=message.chat.id, text=text)
 
 
 async def message_processing_mainchat(message: types.Message):
     db.insert_or_update(userid=message.chat.id, message=message.text)
-    active.models['MainChat'].parse_and_add(text=message.text)
-    text = active.models['MainChat'].generate_answer(message=message.text)
+    app.active.models['MainChat'].parse_and_add(text=message.text)
+    text = app.active.models['MainChat'].generate_answer(message=message.text)
     await app.bot.send_message(chat_id=message.chat.id, text=text)
 
 
 async def message_processing_group(message: types.Message):
     db.insert_or_update(userid=message.chat.id, message=message.text)
-    active.models[message.chat.id].parse_and_add(text=message.text)
-    text = active.models[message.chat.id].generate_answer(message=message.text)
+    app.active.models[message.chat.id].parse_and_add(text=message.text)
+    text = app.active.models[message.chat.id].generate_answer(message=message.text)
     await app.bot.send_message(chat_id=message.chat.id, text=text)
 
 
 async def message_processing_pm(message: types.Message):
     db.insert_or_update(userid=message.chat.id, message=message.text)
-    text = active.models['MainChat'].generate_answer(message=message.text)
+    text = app.active.models['MainChat'].generate_answer(message=message.text)
     await app.bot.send_message(chat_id=message.chat.id, text=text)
 
 

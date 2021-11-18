@@ -176,7 +176,3 @@ class MarkovManager:
                         r'database\messages.db',
                         '''SELECT message FROM texts WHERE userid = :userid''',
                         {'userid': chatid})
-
-
-active = MarkovManager()
-
