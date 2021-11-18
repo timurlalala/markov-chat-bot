@@ -1,6 +1,6 @@
-import sqlite3
-import random
 import logging
+import random
+import sqlite3
 
 
 class Markov:

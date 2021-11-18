@@ -1,5 +1,5 @@
 from aiogram import types, Dispatcher
-import logging
+
 from app.markov import active
 
 
