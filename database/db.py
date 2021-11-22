@@ -38,7 +38,7 @@ def _init_db():
     """
     Runs a SQL script to create new database
     """
-    with open(r"C:\Users\timur\PycharmProjects\TelegramBot\database\db.sql", 'r') as file:
+    with open(r"/database/db.sql", 'r') as file:
         sql = file.read()
     cursor.executescript(sql)
     conn.commit()
