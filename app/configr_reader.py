@@ -4,22 +4,26 @@ from dataclasses import dataclass
 
 @dataclass
 class TgBot:
+    """dataclass for global bot parameters"""
     token: str
 
 
 @dataclass
 class IDs:
+    """dataclass for admins recognising"""
     admin_id: str
     admin_group_id: str
 
 
 @dataclass
 class Config:
+    """dataclass for config"""
     tg_bot: TgBot
     admin_ids: IDs
 
 
 def load_config(path: str):
+    """reads config and returns Config dataclass object"""
     config = configparser.ConfigParser()
     config.read(path)
 

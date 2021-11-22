@@ -5,10 +5,17 @@ import sqlite3
 
 class Markov:
     """
-    order - number of characters in window,
-    rand_coeff - random coefficient
+    Class for Markov chain logic
+        matrix - dict with chain statistics
+        windows - list of avialable window sizes for chain
+        last_text - last characters of last added text
+        rand_coeff - chance of random (non-statistical) elongation (in promille)
     """
-    def __init__(self, order=None, rand_coeff=10):
+    def __init__(self, order: int = None, rand_coeff: int = 10):
+        """
+        :param order: size of chain's window
+        :param rand_coeff: coefficient of random
+        """
         self.matrix = {}
         if order is None:
             self.windows = [9, 6, 3, 1]
@@ -16,11 +23,14 @@ class Markov:
             self.windows = [order, 9, 6, 3, 1]
         self.N = self.windows[0]
         self.last_text = ' ' * self.N
+        # last_text good for answer generations or if model was learned on separate sentences
         self.rand_coeff = rand_coeff
 
-    def _make_pairs(self, text):
+    def _make_pairs(self, text: str) -> tuple[str, str]:
         """
-        Makes pairs
+        Generator function; Makes "key sequence - next character" pairs
+        :param text: text to analyze
+        :return: tuple (ks, next_char)
         """
         for n in self.windows:
             if len(text) < n:
@@ -36,16 +46,17 @@ class Markov:
             else:
                 for i in range(len(text)):
                     if i < (len(text) - n):
-                        first, second = text[i: i+n], text[i+n]
-                        yield first, second
+                        ks, next_char = text[i: i + n], text[i + n]
+                        yield ks, next_char
                     else:
-                        first, second = text[i: i+n], None
-                        yield first, second
+                        ks, next_char = text[i: i + n], None
+                        yield ks, next_char
                         break
 
-    def parse_and_add(self, text):
+    def parse_and_add(self, text: str):
         """
-        Parses text and adds to statistic matrix
+        Makes pairs from text and adds them to statistic matrix
+        :param text: text to analyze
         """
         for i in self._make_pairs(text):
             try:
@@ -56,22 +67,26 @@ class Markov:
                 except KeyError:
                     self.matrix[i[0]] = {i[1]: 1}
 
-    def _get_primer(self):
+    def _get_primer(self) -> str:
         """
-        Returns first characters of text to elongate
+        Returns first characters of text from matrix
+        :return: string
         """
         try:
-            primer = random.\
+            primer = random. \
                 choices(list(self.matrix['_START'].keys()), weights=list(self.matrix['_START'].values()))[0]
         except KeyError:
             primer = 'Недостаточно данных для генерациии сообщений.\
                         \nБот учится на ваших сообщениях, напишите что-нибудь!'
         return primer
 
-    def _elongate(self, primer, ignore_none=False, strict=False):
+    def _elongate(self, primer: str, ignore_none=False, strict=False) -> tuple[str, bool]:
         """
         Elongates the given primer by 1 char
-        Returns elongated string and is_end_of_text (True/False)
+        :param primer: string to elongate
+        :param ignore_none: if True - elongate, ignoring text endings
+        :param strict: if True - elongate even if primer can't be found in matrix
+        :return: tuple (elongated primer, is_end_of_text)
         """
         for n in self.windows:
             if primer[-n:] in self.matrix:
@@ -104,9 +119,14 @@ class Markov:
             else:
                 return primer, True
 
-    def generate_l(self, string=None, lengthmin=1, lengthmax=500):
+    def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500) -> str:
         """
-        Generates text from primer string (if given) with specified max and min length
+        Generates text from primer string (if given) within specified length borders
+        Sometimes text may be slightly longer than lengthmax
+        :param string: string to elongate, default None
+        :param lengthmin: minimal length of text, default 1
+        :param lengthmax: maximal length of text, default 500
+        :return: generated text
         """
         length = random.randint(lengthmin, lengthmax)
         if string is None:
@@ -119,9 +139,11 @@ class Markov:
                 string, is_end_of_text = self._elongate(string)
         return string
 
-    def generate(self, string=None, **kwargs):
+    def generate(self, string: str = None, **kwargs) -> str:
         """
         Generates text from primer string (if given)
+        :param string: string to elongate, default None
+        :return: generated text
         """
         if string is None:
             string = self._get_primer()
@@ -130,35 +152,26 @@ class Markov:
             string, is_end_of_text = self._elongate(string, **kwargs)
         return string
 
-    # def generate_answer(self, message):
-    #     """
-    #     Generates an answer, takes message text as primer
-    #     """
-    #     message += ' '
-    #     for n in self.windows:
-    #         if len(message) < n:
-    #             continue
-    #         else:
-    #             string = message[-n:]
-    #             is_end_of_text = False
-    #             while is_end_of_text is False:
-    #                 string, is_end_of_text = self._elongate(string, strict=True)
-    #             string = string[n:]
-    #             return string
-
 
 class Model(Markov):
     """
-    order - number of characters in window,
-    rand_coeff - random coefficient
+    Markov class, but with additional chat-aimed functional
+        answer_chance - chance of answering to messages in chat
     """
-    def __init__(self, order=None, rand_coeff=10):
+
+    def __init__(self, order: int = None, rand_coeff: int = 10):
+        """
+        :param order: size of chain's window
+        :param rand_coeff: coefficient of random
+        """
         super().__init__(order, rand_coeff)
         self.answer_chance = 1
 
-    def generate_answer(self, message):
+    def generate_answer(self, message: str) -> str:
         """
         Generates an answer text, takes message as primer
+        :param message: text of message to answer
+        :return: text of answer
         """
         message += ' '
         for n in self.windows:
@@ -170,21 +183,41 @@ class Model(Markov):
                 string = string[n:]
                 return string
 
-    def set_rand_coeff(self, rand_coeff):
+    def set_rand_coeff(self, rand_coeff: int) -> str:
+        """
+        Sets rand_coeff attribute
+        :param rand_coeff: new rand_coeff to set
+        :return: success message
+        """
         self.rand_coeff = rand_coeff
         return "Успешно"
 
-    def set_answer_chance(self, answer_chance):
-        self.answer_chance = answer_chance/100
+    def set_answer_chance(self, answer_chance: int) -> str:
+        """
+        Sets answer_chance attribute
+        :param answer_chance: new answer_chance to set
+        :return: success message
+        """
+        self.answer_chance = answer_chance / 100
         return "Успешно"
 
 
 class Manager:
-
+    """
+    Class for create and manage multiple Markov chain models
+        models - dict of models, keys are model names
+    """
     def __init__(self):
         self.models = {}
 
-    def init_model(self, modelname, path, *query, **kwargs):
+    def init_model(self, modelname: str, path: str, *query, **kwargs):
+        """
+        Creates model and trains it on database contents
+        :param modelname: name of model
+        :param path: path to database
+        :param query: SQL query and substitutions dict
+        :param kwargs: kwargs to Model.__init__()
+        """
         conn = sqlite3.connect(path)
         cursor = conn.cursor()
         cursor.execute(*query)
@@ -196,13 +229,21 @@ class Manager:
         logging.info(f'Parsing {path}: Completed')
         logging.info(f'Model is ready')
 
-    def init_chat_model(self, chatid):
+    def init_chat_model(self, chatid: str):
+        """
+        Creates a model for using in common chat
+        :param chatid: chatid, will be a name of model
+        """
         self.init_model(chatid,
                         r'database\messages.db',
                         '''SELECT message FROM texts WHERE userid = :userid''',
                         {'userid': chatid})
 
-    def check_model_exists(self, chatid):
+    def check_model_exists(self, chatid: str):
+        """
+        Checks if chat model exists, if not - creates it
+        :param chatid: chatid or name of model
+        """
         try:
             self.models[chatid]
         except KeyError:
