@@ -90,11 +90,11 @@ class Markov:
         """
         for n in self.windows:
             try:
-                if random.randint(1, 1000) > self.rand_coeff:
+                if random.randint(0, 1000) > self.rand_coeff:
                     next_char = random.choices(list(self.matrix[primer[-n:]].keys()),
                                                list(self.matrix[primer[-n:]].values()))[0]
                 else:
-                    next_char = random.choice(list(self.matrix.keys()))
+                    next_char = random.choice(list(self.matrix[random.choice(list(self.matrix.keys()))].keys()))
 
                 if next_char is None:
                     if ignore_none is False:
@@ -167,21 +167,24 @@ class Model(Markov):
         super().__init__(order, rand_coeff)
         self.answer_chance = 1
 
-    def generate_answer(self, message: str) -> str:
+    def generate_answer(self, message: str):
         """
         Generates an answer text, takes message as primer
         :param message: text of message to answer
         :return: text of answer
         """
         message += ' '
-        for n in self.windows:
-            if len(message) >= n:
-                string = message[-n:]
-                string = self.generate(string=string, strict=True)
-                string = string[n:]
-                return string
-            else:
-                continue
+        if random.random() < self.answer_chance:
+            for n in self.windows:
+                if len(message) >= n:
+                    string = message[-n:]
+                    string = self.generate(string=string, strict=True)
+                    string = string[n:]
+                    return string
+                else:
+                    continue
+        else:
+            return None
 
     def set_rand_coeff(self, rand_coeff: int) -> str:
         """
@@ -189,7 +192,7 @@ class Model(Markov):
         :param rand_coeff: new rand_coeff to set
         :return: success message
         """
-        self.rand_coeff = rand_coeff
+        self.rand_coeff = rand_coeff * 10
         return "Успешно"
 
     def set_answer_chance(self, answer_chance: int) -> str:

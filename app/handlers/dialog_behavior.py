@@ -1,5 +1,6 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import filters
+from aiogram.utils import exceptions
 
 import app.app as app
 import database.db as db
@@ -14,7 +15,10 @@ async def message_processing_mainchat(message: types.Message):
     db.insert_or_update(userid=message.chat.id, message=message.text)
     app.active.models[message.chat.id].parse_and_add(text=message.text)
     text = app.active.models[message.chat.id].generate_answer(message=message.text)
-    await app.bot.send_message(chat_id=message.chat.id, text=text)
+    try:
+        await app.bot.send_message(chat_id=message.chat.id, text=text)
+    except exceptions.MessageTextIsEmpty:
+        return
 
 
 async def message_processing_group(message: types.Message):
@@ -24,7 +28,10 @@ async def message_processing_group(message: types.Message):
     except KeyError:
         app.active.check_model_exists(message.chat.id)
     text = app.active.models[message.chat.id].generate_answer(message=message.text)
-    await app.bot.send_message(chat_id=message.chat.id, text=text)
+    try:
+        await app.bot.send_message(chat_id=message.chat.id, text=text)
+    except exceptions.MessageTextIsEmpty:
+        return
 
 
 async def message_processing_pm(message: types.Message):

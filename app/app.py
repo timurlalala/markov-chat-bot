@@ -3,10 +3,12 @@ import logging
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from app.config_reader import load_config
 from app.handlers.service_commands import register_commands_handlers
 from app.handlers.dialog_behavior import register_message_handlers
+from app.handlers.settings import register_handlers_settings
 from app.model import Manager
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 config = load_config("config/bot.ini")
 
 bot = Bot(token=config.tg_bot.token)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 active = Manager()
 
@@ -34,6 +36,7 @@ def run():
                       {'userid': config.admin_ids.admin_group_id})
 
     register_commands_handlers(dp)
+    register_handlers_settings(dp)
     register_message_handlers(dp)
 
     executor.start_polling(dp)
