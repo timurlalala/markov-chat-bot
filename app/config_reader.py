@@ -11,8 +11,8 @@ class TgBot:
 @dataclass
 class IDs:
     """dataclass for admins recognising"""
-    admin_id: str
-    admin_group_id: str
+    admin_id: int
+    admin_group_id: int
 
 
 @dataclass
@@ -35,7 +35,7 @@ def load_config(path: str):
             token=tg_bot["token"]
         ),
         admin_ids=IDs(
-            admin_id=ids["admin_id"],
-            admin_group_id=ids["admin_group_id"]
+            admin_id=int(ids["admin_id"]),
+            admin_group_id=int(ids["admin_group_id"])
         )
     )

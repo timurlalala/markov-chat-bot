@@ -1,11 +1,13 @@
 from aiogram import types, Dispatcher
+import logging
 
 import app.app as app
 
 
 async def cmd_start(message: types.Message):
     app.active.check_model_exists(message.chat.id)
-    await message.answer(f"Привет, {message.from_user.username}! Я Abobus)))")
+    logging.info(f'{message.chat.id} --- {message.from_user.username}')
+    await message.answer(f"Привет, {message.chat.full_name}! Я Абобус.")
 
 
 async def cmd_help(message: types.Message):
