@@ -30,28 +30,28 @@ class Markov:
         """
         Generator function; Makes "key sequence - next character" pairs
         :param text: text to analyze
-        :return: tuple (ks, next_char)
+        :return: tuple (key_seq, next_char)
         """
         for n in self.windows:
-            if len(text) < n:
-                continue
-            else:
+            if len(text) >= n:
                 yield '_START', text[:n]
                 text = (self.last_text + ' ' + text).strip()
                 self.last_text = text[-n:]
                 break
-        for n in self.windows:
-            if len(text) < n:
-                continue
             else:
+                continue
+        for n in self.windows:
+            if len(text) >= n:
                 for i in range(len(text)):
                     if i < (len(text) - n):
-                        ks, next_char = text[i: i + n], text[i + n]
-                        yield ks, next_char
+                        key_seq, next_char = text[i: i + n], text[i + n]
+                        yield key_seq, next_char
                     else:
-                        ks, next_char = text[i: i + n], None
-                        yield ks, next_char
+                        key_seq, next_char = text[i: i + n], None
+                        yield key_seq, next_char
                         break
+            else:
+                continue
 
     def parse_and_add(self, text: str):
         """
@@ -89,7 +89,7 @@ class Markov:
         :return: tuple (elongated primer, is_end_of_text)
         """
         for n in self.windows:
-            if primer[-n:] in self.matrix:
+            try:
                 if random.randint(1, 1000) > self.rand_coeff:
                     next_char = random.choices(list(self.matrix[primer[-n:]].keys()),
                                                list(self.matrix[primer[-n:]].values()))[0]
@@ -106,16 +106,16 @@ class Markov:
                             next_char = random.choices(list(temp.keys()),
                                                        list(temp.values()))[0]
                             del temp
-                            return primer + next_char, False
+                            return ''.join([primer, next_char]), False
                         else:
-                            return primer, True
+                            continue
                 else:
-                    return primer + next_char, False
-            else:
+                    return ''.join([primer, next_char]), False
+            except KeyError:
                 continue
         else:
             if strict is True:
-                return primer + self._get_primer(), False
+                return ''.join([primer, self._get_primer()]), False
             else:
                 return primer, True
 
@@ -175,13 +175,13 @@ class Model(Markov):
         """
         message += ' '
         for n in self.windows:
-            if len(message) < n:
-                continue
-            else:
+            if len(message) >= n:
                 string = message[-n:]
                 string = self.generate(string=string, strict=True)
                 string = string[n:]
                 return string
+            else:
+                continue
 
     def set_rand_coeff(self, rand_coeff: int) -> str:
         """

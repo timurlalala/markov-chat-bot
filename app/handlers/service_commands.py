@@ -4,8 +4,8 @@ import app.app as app
 
 
 async def cmd_start(message: types.Message):
-    await message.answer(f"Привет, {message.chat.username}! Я Кунжут)))")
     app.active.check_model_exists(message.chat.id)
+    await message.answer(f"Привет, {message.from_user.username}! Я Abobus)))")
 
 
 async def cmd_help(message: types.Message):
