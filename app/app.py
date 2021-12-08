@@ -28,7 +28,7 @@ def run():
                       order=12,
                       rand_coeff=1)
 
-    active.init_model('MainChat',
+    active.init_model(config.admin_ids.admin_group_id,
                       r'database/messages.db',
                       '''SELECT message FROM texts WHERE userid = :userid''',
                       {'userid': config.admin_ids.admin_group_id})

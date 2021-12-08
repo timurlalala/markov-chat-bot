@@ -12,8 +12,8 @@ async def command_anek(message: types.Message):
 
 async def message_processing_mainchat(message: types.Message):
     db.insert_or_update(userid=message.chat.id, message=message.text)
-    app.active.models['MainChat'].parse_and_add(text=message.text)
-    text = app.active.models['MainChat'].generate_answer(message=message.text)
+    app.active.models[message.chat.id].parse_and_add(text=message.text)
+    text = app.active.models[message.chat.id].generate_answer(message=message.text)
     await app.bot.send_message(chat_id=message.chat.id, text=text)
 
 
@@ -29,7 +29,7 @@ async def message_processing_group(message: types.Message):
 
 async def message_processing_pm(message: types.Message):
     db.insert_or_update(userid=message.chat.id, message=message.text)
-    text = app.active.models['MainChat'].generate_answer(message=message.text)
+    text = app.active.models[app.config.admin_ids.admin_group_id].generate_answer(message=message.text)
     await app.bot.send_message(chat_id=message.chat.id, text=text)
 
 
