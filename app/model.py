@@ -238,7 +238,7 @@ class Manager:
         :param chatid: chatid, will be a name of model
         """
         self.init_model(chatid,
-                        r'database\messages.db',
+                        r'database/messages.db',
                         '''SELECT message FROM texts WHERE userid = :userid''',
                         {'userid': chatid})
 
