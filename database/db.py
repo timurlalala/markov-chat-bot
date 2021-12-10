@@ -1,6 +1,7 @@
 import sqlite3
+from app.app import config
 
-conn = sqlite3.connect('database/messages.db', check_same_thread=False)
+conn = sqlite3.connect(config.database.messages_path, check_same_thread=False)
 cursor = conn.cursor()
 
 

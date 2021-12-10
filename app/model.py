@@ -1,6 +1,7 @@
 import logging
 import random
 import sqlite3
+from app.app import config
 
 
 class Markov:
@@ -238,7 +239,7 @@ class Manager:
         :param chatid: chatid, will be a name of model
         """
         self.init_model(chatid,
-                        r'database/messages.db',
+                        config.database.messages_path,
                         '''SELECT message FROM texts WHERE userid = :userid''',
                         {'userid': chatid})
 
