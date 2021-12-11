@@ -1,0 +1,4 @@
+#!/bin/bash
+systemctl stop markovbot
+git pull
+systemctl start markovbot
