@@ -6,19 +6,15 @@ from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from app.config_reader import config
+from app.model import active
 from app.handlers.service_commands import register_commands_handlers
 from app.handlers.dialog_behavior import register_message_handlers
 from app.handlers.settings import register_handlers_settings
-from app.model import Manager
 
 logging.basicConfig(level=logging.INFO)
 
-# config = load_config("config/bot.ini")
-
 bot = Bot(token=config.tg_bot.token)
 dp = Dispatcher(bot, storage=MemoryStorage())
-
-active = Manager()
 
 
 def run():

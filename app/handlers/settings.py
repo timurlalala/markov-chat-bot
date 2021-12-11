@@ -1,7 +1,7 @@
 from aiogram import Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher import FSMContext, filters
 from aiogram.dispatcher.filters.state import State, StatesGroup
-import app.app as app
+from app.app import active
 
 
 class SettingsMenu(StatesGroup):
@@ -37,26 +37,29 @@ async def option_chosen(message: types.Message, state: FSMContext):
 
 async def set_ac(message: types.Message, state: FSMContext):
     try:
-        text = app.active.models[message.chat.id].set_answer_chance(int(message.text))
+        text = active.models[message.chat.id].set_answer_chance(int(message.text))
     except KeyError:
-        app.active.check_model_exists(message.chat.id)
-        text = app.active.models[message.chat.id].set_answer_chance(int(message.text))
+        active.check_model_exists(message.chat.id)
+        text = active.models[message.chat.id].set_answer_chance(int(message.text))
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
 async def set_rc(message: types.Message, state: FSMContext):
     try:
-        text = app.active.models[message.chat.id].set_rand_coeff(int(message.text))
+        text = active.models[message.chat.id].set_rand_coeff(int(message.text))
     except KeyError:
-        app.active.check_model_exists(message.chat.id)
-        text = app.active.models[message.chat.id].set_answer_chance(int(message.text))
+        active.check_model_exists(message.chat.id)
+        text = active.models[message.chat.id].set_answer_chance(int(message.text))
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
 def register_handlers_settings(dp: Dispatcher):
-    dp.register_message_handler(settings_start, commands="settings", state="*")
+    dp.register_message_handler(settings_start,
+                                filters.ChatTypeFilter(types.ChatType.GROUP),
+                                commands="settings",
+                                state="*")
     dp.register_message_handler(option_chosen, state=SettingsMenu.waiting_for_option)
     dp.register_message_handler(set_rc, state=SettingsMenu.waiting_for_rand_coeff)
     dp.register_message_handler(set_ac, state=SettingsMenu.waiting_for_ans_chance)

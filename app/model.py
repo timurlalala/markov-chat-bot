@@ -252,3 +252,6 @@ class Manager:
             self.models[chatid]
         except KeyError:
             self.init_chat_model(chatid)
+
+
+active = Manager()

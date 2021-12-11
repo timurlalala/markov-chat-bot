@@ -1,11 +1,11 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 import logging
-import app.app as app
+from app.app import active
 
 
 async def cmd_start(message: types.Message, state: FSMContext):
-    app.active.check_model_exists(message.chat.id)
+    active.check_model_exists(message.chat.id)
     logging.info(f'{message.chat.id} --- {message.from_user.username}')
     await state.finish()
     await message.answer(f"Привет, {message.chat.full_name}! Я Абобус.", reply_markup=types.ReplyKeyboardRemove())
