@@ -79,7 +79,7 @@ async def asm_option_chosen(message: types.Message, state: FSMContext):
         await state.finish()
         subprocess.run('/home/timursam00/markov-chat-bot/update', shell=True, capture_output=True)
     elif message.text.lower() == 'status':
-        result = subprocess.run(['systemctl status', 'markovbot'], capture_output=True)
+        result = subprocess.run('systemctl status markovbot', shell=True, capture_output=True)
         text = result.stdout.decode('utf-8')
         await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
@@ -92,7 +92,7 @@ async def asm_option_chosen(message: types.Message, state: FSMContext):
 
 async def asm_update_log(message: types.Message, state: FSMContext):
     try:
-        with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
+        with open('/home/timursam00/markov-chat-bot/update.txt', 'r') as file:
             updatelog = file.read()
     except FileNotFoundError:
         updatelog = 'there is no update log'
