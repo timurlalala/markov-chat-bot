@@ -86,7 +86,7 @@ async def asm_option_chosen(message: types.Message, state: FSMContext):
         await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
     elif message.text.lower() == 'last update log':
-        return
+        pass
     else:
         await message.reply('Выберите опцию из предложенных ниже.')
         return
@@ -105,16 +105,16 @@ async def asm_update_log(message: types.Message, state: FSMContext):
 
 def register_handlers_settings(dp: Dispatcher):
 
+    dp.register_message_handler(asm_update_log,
+                                filters.IDFilter(config.admin_ids.admin_id),
+                                filters.Text('last update log'),
+                                state="*")
     dp.register_message_handler(asm_start,
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 commands="settings",
                                 state="*")
     dp.register_message_handler(asm_option_chosen,
                                 state=AdminSettingsMenu.asm_waiting_for_option)
-    dp.register_message_handler(asm_update_log,
-                                filters.IDFilter(config.admin_ids.admin_id),
-                                filters.Text('last update log'),
-                                state="*")
 
     dp.register_message_handler(gsm_start,
                                 filters.ChatTypeFilter(types.ChatType.GROUP),
