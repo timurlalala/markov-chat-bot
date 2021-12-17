@@ -17,7 +17,7 @@ bot = Bot(token=config.tg_bot.token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-def run():
+async def run():
     logging.basicConfig(level=logging.INFO)
 
     active.init_model('ANEKS',
@@ -45,7 +45,6 @@ def run():
     except FileNotFoundError:
         updatelog = 'there is no update log'
 
-    bot.send_message(text=updatelog,
-                     chat_id=config.admin_ids.admin_id)
+    await bot.send_message(chat_id=config.admin_ids.admin_id, text=updatelog)
 
     executor.start_polling(dp)
