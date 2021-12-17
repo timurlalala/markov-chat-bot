@@ -17,7 +17,7 @@ class AdminSettingsMenu(StatesGroup):
 
 
 gsm_options = ('answer_chance', 'rand_coeff', '/cancel')
-asm_options = ('update bot', 'status', 'last update log', '/cancel')
+asm_options = ('update_bot', 'status', 'last update log', '/cancel')
 
 
 async def gsm_start(message: types.Message):
@@ -71,7 +71,7 @@ async def asm_start(message: types.Message):
 
 
 async def asm_option_chosen(message: types.Message, state: FSMContext):
-    if message.text.lower() == 'update bot':
+    if message.text.lower() == 'update_bot':
         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
                                              one_time_keyboard=True,
                                              selective=True)
@@ -104,7 +104,10 @@ async def asm_update_log(message: types.Message, state: FSMContext):
 
 
 def register_handlers_settings(dp: Dispatcher):
-
+    dp.register_message_handler(asm_update_log,
+                                filters.IDFilter(config.admin_ids.admin_id),
+                                filters.Text('update_bot'),
+                                state="*")
     dp.register_message_handler(asm_update_log,
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 filters.Text('last update log'),
