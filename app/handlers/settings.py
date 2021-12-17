@@ -115,7 +115,7 @@ def register_handlers_settings(dp: Dispatcher):
                                 filters.Text('*update bot*'),
                                 state=AdminSettingsMenu.asm_waiting_for_option)
     dp.register_message_handler(asm_show_status_chosen,
-                                filters.Text('*show statust*'),
+                                filters.Text('*show status*'),
                                 state=AdminSettingsMenu.asm_waiting_for_option)
     dp.register_message_handler(asm_update_log,
                                 filters.IDFilter(config.admin_ids.admin_id),
