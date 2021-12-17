@@ -20,13 +20,18 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 def run():
     logging.basicConfig(level=logging.INFO)
 
-    active.init_model('Aneks',
+    active.init_model('ANEKS',
                       config.database.anecdotes_path,
                       '''SELECT anek FROM aneks ;''',
                       order=12,
                       rand_coeff=1)
 
     active.init_model(config.admin_ids.admin_group_id,
+                      config.database.messages_path,
+                      '''SELECT message FROM texts WHERE userid = :userid''',
+                      {'userid': config.admin_ids.admin_group_id})
+
+    active.init_model('PM_MODEL',
                       config.database.messages_path,
                       '''SELECT message FROM texts WHERE userid = :userid''',
                       {'userid': config.admin_ids.admin_group_id})
