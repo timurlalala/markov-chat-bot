@@ -2,5 +2,4 @@
 cd /home/timursam00/markov-chat-bot
 systemctl stop markovbot
 git pull > /home/timursam00/markov-chat-bot/update.txt
-chmod +x /home/timursam00/markov-chat-bot/update
 systemctl start markovbot
