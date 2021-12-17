@@ -104,15 +104,15 @@ async def asm_update_log(message: types.Message, state: FSMContext):
 
 
 def register_handlers_settings(dp: Dispatcher):
+    dp.register_message_handler(asm_update_log,
+                                filters.IDFilter(config.admin_ids.admin_id),
+                                filters.Text('last update log'),
+                                state="*")
     dp.register_message_handler(asm_option_chosen,
                                 state=AdminSettingsMenu.asm_waiting_for_option)
     dp.register_message_handler(asm_update_log,
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 filters.Text('update_bot'),
-                                state="*")
-    dp.register_message_handler(asm_update_log,
-                                filters.IDFilter(config.admin_ids.admin_id),
-                                filters.Text('last update log'),
                                 state="*")
     dp.register_message_handler(asm_start,
                                 filters.IDFilter(config.admin_ids.admin_id),
