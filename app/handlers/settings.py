@@ -79,16 +79,18 @@ async def asm_option_chosen(message: types.Message, state: FSMContext):
         await state.finish()
         subprocess.run('/home/timursam00/markov-chat-bot/update', shell=True, capture_output=True)
     elif message.text.lower() == 'status':
-        result = subprocess.run(['systemctl', 'status markovbot'], capture_output=True)
+        result = subprocess.run(['systemctl status', 'markovbot'], capture_output=True)
         text = result.stdout.decode('utf-8')
         await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
+    elif message.text.lower() == 'last update log':
+        return
     else:
         await message.reply('Выберите опцию из предложенных ниже.')
         return
 
 
-async def asm_update_log(message: types.Message):
+async def asm_update_log(message: types.Message, state: FSMContext):
     try:
         with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
             updatelog = file.read()
@@ -96,6 +98,7 @@ async def asm_update_log(message: types.Message):
         updatelog = 'there is no update log'
 
     await message.answer(text=updatelog, reply_markup=types.ReplyKeyboardRemove())
+    await state.finish()
 
 
 def register_handlers_settings(dp: Dispatcher):
