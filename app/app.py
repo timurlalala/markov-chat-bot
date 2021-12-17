@@ -17,7 +17,18 @@ bot = Bot(token=config.tg_bot.token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-async def run():
+@dp.message_handler()
+async def asm_send_message():
+    try:
+        with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
+            updatelog = file.read()
+    except FileNotFoundError:
+        updatelog = 'there is no update log'
+
+    await bot.send_message(chat_id=config.admin_ids.admin_id, text=updatelog)
+
+
+def run():
     logging.basicConfig(level=logging.INFO)
 
     active.init_model('ANEKS',
@@ -39,12 +50,7 @@ async def run():
     register_commands_handlers(dp)
     register_handlers_settings(dp)
     register_message_handlers(dp)
-    try:
-        with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
-            updatelog = file.read()
-    except FileNotFoundError:
-        updatelog = 'there is no update log'
 
-    await bot.send_message(chat_id=config.admin_ids.admin_id, text=updatelog)
+    asm_send_message()
 
     executor.start_polling(dp)
