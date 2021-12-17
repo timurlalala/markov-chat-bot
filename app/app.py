@@ -44,7 +44,8 @@ def run():
             updatelog = file.read()
     except FileNotFoundError:
         updatelog = 'there is no update log'
-    bot.send_message(text=updatelog,
+
+    await bot.send_message(text=updatelog,
                      chat_id=config.admin_ids.admin_id)
 
     executor.start_polling(dp)
