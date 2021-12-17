@@ -3,7 +3,6 @@ from aiogram.dispatcher import FSMContext, filters
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from app.app import active, config
 import subprocess
-# import logging
 
 
 class GroupSettingsMenu(StatesGroup):
