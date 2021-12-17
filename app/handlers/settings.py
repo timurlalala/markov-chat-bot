@@ -71,13 +71,14 @@ async def asm_start(message: types.Message):
 
 async def asm_option_chosen(message: types.Message, state: FSMContext):
     if message.text.lower() == 'update bot':
-        await message.reply('', reply_markup=types.ReplyKeyboardRemove())
+        await message.reply('Запрашиваю обновления', reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
         subprocess.run('/home/timursam00/markov-chat-bot/update', shell=True, capture_output=True)
     elif message.text.lower() == 'status':
-        await message.reply('', reply_markup=types.ReplyKeyboardRemove())
+        result = subprocess.run(['systemctl', 'status markovbot'], capture_output=True)
+        text = result.stdout.decode('utf-8')
+        await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
-        subprocess.run(['systemctl', 'status markovbot'], capture_output=True)
     else:
         await message.reply('Выберите опцию из предложенных ниже.')
         return
