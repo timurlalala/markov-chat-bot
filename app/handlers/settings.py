@@ -16,7 +16,7 @@ class AdminSettingsMenu(StatesGroup):
 
 
 gsm_options = ('answer_chance', 'rand_coeff', '/cancel')
-asm_options = ('update bot', 'status', '/cancel')
+asm_options = ('update bot', 'status', 'last update log', '/cancel')
 
 
 async def gsm_start(message: types.Message):
@@ -71,7 +71,11 @@ async def asm_start(message: types.Message):
 
 async def asm_option_chosen(message: types.Message, state: FSMContext):
     if message.text.lower() == 'update bot':
-        await message.reply('Запрашиваю обновления', reply_markup=types.ReplyKeyboardRemove())
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
+                                             one_time_keyboard=True,
+                                             selective=True)
+        keyboard.add('last update log')
+        await message.reply('Запрашиваю обновления', reply_markup=keyboard)
         await state.finish()
         subprocess.run('/home/timursam00/markov-chat-bot/update', shell=True, capture_output=True)
     elif message.text.lower() == 'status':
@@ -84,15 +88,28 @@ async def asm_option_chosen(message: types.Message, state: FSMContext):
         return
 
 
+async def asm_update_log(message: types.Message):
+    try:
+        with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
+            updatelog = file.read()
+    except FileNotFoundError:
+        updatelog = 'there is no update log'
+
+    await message.answer(text=updatelog, reply_markup=types.ReplyKeyboardRemove())
+
+
 def register_handlers_settings(dp: Dispatcher):
 
     dp.register_message_handler(asm_start,
-                                filters.ChatTypeFilter(types.ChatType.PRIVATE),
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 commands="settings",
                                 state="*")
     dp.register_message_handler(asm_option_chosen,
                                 state=AdminSettingsMenu.asm_waiting_for_option)
+    dp.register_message_handler(asm_update_log,
+                                filters.IDFilter(config.admin_ids.admin_id),
+                                filters.Text('last update log'),
+                                state="*")
 
     dp.register_message_handler(gsm_start,
                                 filters.ChatTypeFilter(types.ChatType.GROUP),
