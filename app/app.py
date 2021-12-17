@@ -39,9 +39,11 @@ def run():
     register_commands_handlers(dp)
     register_handlers_settings(dp)
     register_message_handlers(dp)
-
-    with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
-        updatelog = file.read()
+    try:
+        with open('/home/timursam00/markov-chat-bot/update.log', 'r') as file:
+            updatelog = file.read()
+    except FileNotFoundError:
+        updatelog = 'there is no update log'
     bot.send_message(text=updatelog,
                      chat_id=config.admin_ids.admin_id)
 
