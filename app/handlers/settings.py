@@ -82,7 +82,6 @@ async def asm_option_chosen(message: types.Message, state: FSMContext):
     elif message.text.lower() == 'status':
         result = subprocess.run('systemctl status markovbot', shell=True, capture_output=True)
         text = result.stdout.decode('utf-8')
-        # logging.info(text)
         await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
     elif message.text.lower() == 'last update log':
@@ -98,7 +97,6 @@ async def asm_update_log(message: types.Message, state: FSMContext):
             updatelog = file.read()
     except FileNotFoundError:
         updatelog = 'there is no update log'
-    # logging.info(updatelog)
     await message.answer(text=updatelog, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
