@@ -1,4 +1,8 @@
 #!/bin/bash
+cd /home/timursam00/markov-chat-bot
 systemctl stop markovbot
+git stash
 git pull
+git stash apply
+git stash drop
 systemctl start markovbot
