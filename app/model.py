@@ -133,6 +133,7 @@ class Markov:
                 return primer, True
 
     def format_text(self, text):
+        text = text.strip()
         return ''.join([text[0].upper(), text[1:]])
 
     def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500) -> str:
