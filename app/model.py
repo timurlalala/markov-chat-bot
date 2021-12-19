@@ -146,7 +146,7 @@ class Markov:
             string = self._get_primer()
         is_end_of_text = False
         for _ in range(length):
-            string, is_end_of_text = self._elongate(string, ignore_none=random.choice([True, False]))
+            string, is_end_of_text = self._elongate(string, ignore_none=True)
         else:
             while (string[-1] not in ['.', '!', '?']) and (is_end_of_text is False):
                 string, is_end_of_text = self._elongate(string)
