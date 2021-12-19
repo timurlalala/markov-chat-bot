@@ -132,6 +132,9 @@ class Markov:
             else:
                 return primer, True
 
+    def format_text(self, text):
+        return ''.join([text[0].upper, text[1:]])
+
     def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500) -> str:
         """
         Generates text from primer string (if given) within specified length borders
@@ -150,7 +153,7 @@ class Markov:
         else:
             while (string[-1] not in ['.', '!', '?']) and (is_end_of_text is False):
                 string, is_end_of_text = self._elongate(string)
-        return string
+        return self.format_text(string)
 
     def generate(self, string: str = None, **kwargs) -> str:
         """
@@ -163,7 +166,7 @@ class Markov:
         is_end_of_text = False
         while is_end_of_text is False:
             string, is_end_of_text = self._elongate(string, **kwargs)
-        return string
+        return self.format_text(string)
 
 
 class Model(Markov):
@@ -198,7 +201,7 @@ class Model(Markov):
                     string = self.generate(string=string, strict=True)
                     string = string[n:]
                     self.last_answer_time = time()
-                    return string
+                    return self.format_text(string)
                 else:
                     continue
         else:
