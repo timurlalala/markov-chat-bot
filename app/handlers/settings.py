@@ -109,7 +109,13 @@ def register_handlers_settings(dp: Dispatcher):
     # gsm handlers registering
     dp.register_message_handler(gsm_start,
                                 filters.ChatTypeFilter(types.ChatType.CHANNEL),
+                                commands="settings",
+                                state="*")
+    dp.register_message_handler(gsm_start,
                                 filters.ChatTypeFilter(types.ChatType.GROUP),
+                                commands="settings",
+                                state="*")
+    dp.register_message_handler(gsm_start,
                                 filters.ChatTypeFilter(types.ChatType.SUPERGROUP),
                                 commands="settings",
                                 state="*")
