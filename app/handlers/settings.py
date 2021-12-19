@@ -106,6 +106,24 @@ async def asm_update_log(message: types.Message, state: FSMContext):
 
 # registering handlers
 def register_handlers_settings(dp: Dispatcher):
+    # gsm handlers registering
+    dp.register_message_handler(gsm_start,
+                                filters.ChatTypeFilter(types.ChatType.GROUP),
+                                commands="settings",
+                                state="*")
+    dp.register_message_handler(gsm_ac_chosen,
+                                filters.Text('answer_chance'),
+                                state=GroupSettingsMenu.gsm_waiting_for_option)
+    dp.register_message_handler(gsm_rc_chosen,
+                                filters.Text('rand_coeff'),
+                                state=GroupSettingsMenu.gsm_waiting_for_option)
+    dp.register_message_handler(gsm_set_rc,
+                                state=GroupSettingsMenu.gsm_waiting_for_rand_coeff)
+    dp.register_message_handler(gsm_set_ac,
+                                state=GroupSettingsMenu.gsm_waiting_for_ans_chance)
+    dp.register_message_handler(wrong_opt_chosen,
+                                state=GroupSettingsMenu.gsm_waiting_for_option)
+
     # asm handlers registering
     dp.register_message_handler(asm_start,
                                 filters.ChatTypeFilter(types.ChatType.PRIVATE),
@@ -131,20 +149,3 @@ def register_handlers_settings(dp: Dispatcher):
     dp.register_message_handler(wrong_opt_chosen,
                                 state=AdminSettingsMenu.asm_waiting_for_option)
 
-    # gsm handlers registering
-    dp.register_message_handler(gsm_start,
-                                filters.ChatTypeFilter(types.ChatType.GROUP),
-                                commands="settings",
-                                state="*")
-    dp.register_message_handler(gsm_ac_chosen,
-                                filters.Text('answer_chance'),
-                                state=GroupSettingsMenu.gsm_waiting_for_option)
-    dp.register_message_handler(gsm_rc_chosen,
-                                filters.Text('rand_coeff'),
-                                state=GroupSettingsMenu.gsm_waiting_for_option)
-    dp.register_message_handler(gsm_set_rc,
-                                state=GroupSettingsMenu.gsm_waiting_for_rand_coeff)
-    dp.register_message_handler(gsm_set_ac,
-                                state=GroupSettingsMenu.gsm_waiting_for_ans_chance)
-    dp.register_message_handler(wrong_opt_chosen,
-                                state=GroupSettingsMenu.gsm_waiting_for_option)
