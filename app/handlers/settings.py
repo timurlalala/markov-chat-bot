@@ -81,7 +81,7 @@ async def asm_update_bot_chosen(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
                                          one_time_keyboard=True,
                                          selective=True)
-    keyboard.add('last update log')
+    keyboard.add('*last update log*')
     await message.reply('Запрашиваю обновления...', reply_markup=keyboard)
     await state.finish()
     subprocess.run('/home/timursam00/markov-chat-bot/update', shell=True)
