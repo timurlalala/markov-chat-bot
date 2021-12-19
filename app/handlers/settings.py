@@ -1,7 +1,7 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext, filters
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from app.app import active, config
+from app.app import models_active, config
 import subprocess
 
 
@@ -50,20 +50,20 @@ async def wrong_opt_chosen(message: types.Message, state: FSMContext):
 
 async def gsm_set_ac(message: types.Message, state: FSMContext):
     try:
-        text = active.models[message.chat.id].set_answer_chance(int(message.text))
+        text = models_active.models[message.chat.id].set_answer_chance(int(message.text))
     except KeyError:
-        active.check_model_exists(message.chat.id)
-        text = active.models[message.chat.id].set_answer_chance(int(message.text))
+        models_active.check_model_exists(message.chat.id)
+        text = models_active.models[message.chat.id].set_answer_chance(int(message.text))
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
 async def gsm_set_rc(message: types.Message, state: FSMContext):
     try:
-        text = active.models[message.chat.id].set_rand_coeff(int(message.text))
+        text = models_active.models[message.chat.id].set_rand_coeff(int(message.text))
     except KeyError:
-        active.check_model_exists(message.chat.id)
-        text = active.models[message.chat.id].set_answer_chance(int(message.text))
+        models_active.check_model_exists(message.chat.id)
+        text = models_active.models[message.chat.id].set_answer_chance(int(message.text))
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
@@ -108,6 +108,7 @@ async def asm_update_log(message: types.Message, state: FSMContext):
 def register_handlers_settings(dp: Dispatcher):
     # asm handlers registering
     dp.register_message_handler(asm_start,
+                                filters.ChatTypeFilter(types.ChatType.PRIVATE),
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 commands="settings",
                                 state="*")
@@ -118,10 +119,12 @@ def register_handlers_settings(dp: Dispatcher):
                                 filters.Text('*show status*'),
                                 state=AdminSettingsMenu.asm_waiting_for_option)
     dp.register_message_handler(asm_update_log,
+                                filters.ChatTypeFilter(types.ChatType.PRIVATE),
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 filters.Text('*update bot*'),
                                 state="*")
     dp.register_message_handler(asm_update_log,
+                                filters.ChatTypeFilter(types.ChatType.PRIVATE),
                                 filters.IDFilter(config.admin_ids.admin_id),
                                 filters.Text('*last update log*'),
                                 state="*")

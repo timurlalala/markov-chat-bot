@@ -1,7 +1,7 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext, filters
 import logging
-from app.app import active
+from app.app import models_active
 
 
 async def cmd_start_pm(message: types.Message, state: FSMContext):
@@ -12,7 +12,7 @@ async def cmd_start_pm(message: types.Message, state: FSMContext):
 
 
 async def cmd_start_group(message: types.Message, state: FSMContext):
-    active.check_model_exists(message.chat.id)
+    models_active.check_model_exists(message.chat.id)
     logging.info(f'{message.chat.id} --- {message.from_user.username}')
     await state.finish()
     await message.answer(f"Привет, {message.chat.full_name}! Я Абобус.",

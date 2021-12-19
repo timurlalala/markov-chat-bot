@@ -1,6 +1,8 @@
 import logging
 import random
 import sqlite3
+# import asyncio
+from time import time
 from app.app import config
 
 
@@ -158,15 +160,19 @@ class Model(Markov):
     """
     Markov class, but with additional chat-aimed functional
         answer_chance - chance of answering to messages in chat
+        last_answer_time - timestamp of the last answer
     """
 
-    def __init__(self, order: int = None, rand_coeff: int = 10):
+    def __init__(self, order: int = None, rand_coeff: int = 10, is_main: bool = False):
         """
         :param order: size of chain's window
         :param rand_coeff: coefficient of random
+        :param is_main: main model or not
         """
         super().__init__(order, rand_coeff)
         self.answer_chance = 1
+        self.last_answer_time = time()
+        self.is_main = is_main
 
     def generate_answer(self, message: str):
         """
@@ -181,6 +187,7 @@ class Model(Markov):
                     string = message[-n:]
                     string = self.generate(string=string, strict=True)
                     string = string[n:]
+                    self.last_answer_time = time()
                     return string
                 else:
                     continue
@@ -194,6 +201,7 @@ class Model(Markov):
         :return: success message
         """
         self.rand_coeff = rand_coeff * 10
+        self.last_answer_time = time()
         return "Успешно"
 
     def set_answer_chance(self, answer_chance: int) -> str:
@@ -203,6 +211,7 @@ class Model(Markov):
         :return: success message
         """
         self.answer_chance = answer_chance / 100
+        self.last_answer_time = time()
         return "Успешно"
 
 
@@ -254,4 +263,18 @@ class Manager:
             self.init_chat_model(chatid)
 
 
-active = Manager()
+# async def check_model_alive(models: Manager, ts):
+#     for item in models.models.items():
+#         if item[1].is_main is False:
+#             if ts - item[1].last_answer_time > 86400:
+#                 del models.models[item[0]]
+#         else:
+#             continue
+#
+# async def check_timer(self):
+#     while True:
+#         await asyncio.gather(asyncio.sleep(3600),
+#                              self.check_model_alive(time()))
+
+
+models_active = Manager()
