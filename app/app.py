@@ -23,6 +23,7 @@ def run():
     models_active.init_model('ANEKS',
                              config.database.anecdotes_path,
                              '''SELECT anek FROM aneks ;''',
+                             last_text_enabled=False,
                              order=12,
                              rand_coeff=1,
                              is_main=True)

@@ -29,20 +29,29 @@ class Markov:
         # last_text good for answer generations or if model was learned on separate sentences
         self.rand_coeff = rand_coeff
 
-    def _make_pairs(self, text: str) -> tuple[str, str]:
+    def _make_pairs(self, text: str, last_text_enabled: bool) -> tuple[str, str]:
         """
         Generator function; Makes "key sequence - next character" pairs
         :param text: text to analyze
+        :param last_text_enabled: enable last_text parameter
         :return: tuple (key_seq, next_char)
         """
-        for n in self.windows:
-            if len(text) >= n:
-                yield '_START', text[:n]
-                text = (self.last_text + ' ' + text).strip()
-                self.last_text = text[-n:]
-                break
-            else:
-                continue
+        if last_text_enabled is True:
+            for n in self.windows:
+                if len(text) >= n:
+                    yield '_START', text[:n]
+                    text = (self.last_text + ' ' + text).strip()
+                    self.last_text = text[-n:]
+                    break
+                else:
+                    continue
+        else:
+            for n in self.windows:
+                if len(text) >= n:
+                    yield '_START', text[:n]
+                    break
+                else:
+                    continue
         for n in self.windows:
             if len(text) >= n:
                 for i in range(len(text)):
@@ -56,12 +65,13 @@ class Markov:
             else:
                 continue
 
-    def parse_and_add(self, text: str):
+    def parse_and_add(self, text: str, last_text_enabled: bool = True):
         """
         Makes pairs from text and adds them to statistic matrix
         :param text: text to analyze
+        :param last_text_enabled: enable last_text in model
         """
-        for i in self._make_pairs(text):
+        for i in self._make_pairs(text, last_text_enabled):
             try:
                 self.matrix[i[0]][i[1]] += 1
             except KeyError:
@@ -223,12 +233,13 @@ class Manager:
     def __init__(self):
         self.models = {}
 
-    def init_model(self, modelname: str, path: str, *query, **kwargs):
+    def init_model(self, modelname: str, path: str, *query, last_text_enabled: bool = True,  **kwargs):
         """
         Creates model and trains it on database contents
         :param modelname: name of model
         :param path: path to database
         :param query: SQL query and substitutions dict
+        :param last_text_enabled: enable last_text in model
         :param kwargs: kwargs to Model.__init__()
         """
         conn = sqlite3.connect(path)
@@ -238,7 +249,7 @@ class Manager:
         self.models[modelname] = Model(**kwargs)
         logging.info(f'Parsing {path}: Started...')
         for elem in [i[0] for i in cursor.fetchall()]:
-            self.models[modelname].parse_and_add(elem)
+            self.models[modelname].parse_and_add(elem, last_text_enabled)
         logging.info(f'Parsing {path}: Completed')
         logging.info(f'Model is ready')
 
@@ -261,20 +272,6 @@ class Manager:
             self.models[chatid]
         except KeyError:
             self.init_chat_model(chatid)
-
-
-# async def check_model_alive(models: Manager, ts):
-#     for item in models.models.items():
-#         if item[1].is_main is False:
-#             if ts - item[1].last_answer_time > 86400:
-#                 del models.models[item[0]]
-#         else:
-#             continue
-#
-# async def check_timer(self):
-#     while True:
-#         await asyncio.gather(asyncio.sleep(3600),
-#                              self.check_model_alive(time()))
 
 
 models_active = Manager()
