@@ -242,6 +242,12 @@ class Model(Markov):
         self.last_answer_time = time()
         return "Успешно"
 
+    def get_rand_coeff(self):
+        return self.rand_coeff
+
+    def get_answer_chance(self):
+        return self.answer_chance
+
 
 class Manager:
     """

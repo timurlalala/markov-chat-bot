@@ -17,7 +17,7 @@ class AdminSettingsMenu(StatesGroup):
     asm_waiting_for_option = State()
 
 
-gsm_options = ('answer_chance', 'rand_coeff', '/cancel')
+gsm_options = ('answer_chance', 'rand_coeff', '*показать_параметры*','/cancel')
 asm_options = ('*update bot*', '*show status*', '*last update log*', '/cancel')
 
 
@@ -63,10 +63,17 @@ async def gsm_set_rc(message: types.Message, state: FSMContext):
         text = models_active.models[message.chat.id].set_rand_coeff(int(message.text))
     except KeyError:
         models_active.check_model_exists(message.chat.id)
-        text = models_active.models[message.chat.id].set_answer_chance(int(message.text))
+        text = models_active.models[message.chat.id].set_rand_coeff(int(message.text))
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
+
+async def gsm_show_values(message: types.Message, state: FSMContext):
+    models_active.check_model_exists(message.chat.id)
+    rc = models_active.models[message.chat.id].get_rand_coeff()
+    ac = models_active.models[message.chat.id].get_answer_chance()
+    text = f'rand_coeff = {rc/10} \nanswer_chance = {ac*100}'
+    await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
 
 # handlers for bot management settings
 async def asm_start(message: types.Message):
@@ -129,6 +136,9 @@ def register_handlers_settings(dp: Dispatcher):
                                 state=GroupSettingsMenu.gsm_waiting_for_rand_coeff)
     dp.register_message_handler(gsm_set_ac,
                                 state=GroupSettingsMenu.gsm_waiting_for_ans_chance)
+    dp.register_message_handler(gsm_show_values,
+                                filters.Text('*показать_параметры*'),
+                                state=GroupSettingsMenu.gsm_waiting_for_option)
     dp.register_message_handler(wrong_opt_chosen,
                                 state=GroupSettingsMenu.gsm_waiting_for_option)
 
