@@ -263,6 +263,7 @@ class Manager:
             self.models[modelname] = Model(**kwargs)
         else:
             self.models[chatid] = Model(**kwargs)
+            modelname = chatid
         logging.info(f'Parsing chatid={chatid}: Started...')
         for elem in [i for i in cursor.fetchall()]:
             self.models[modelname].last_answer = elem[1]
