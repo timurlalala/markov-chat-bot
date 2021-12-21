@@ -35,7 +35,7 @@ async def message_processing_mainchat(message: types.Message):
 async def message_processing_mainchat_replied(message: types.Message):
     try:
         text = models_active.models[message.chat.id].generate_answer(message=message.text, answer_chance=1)
-        models_active.models[message.chat.id].last_answer = text[-6:]
+        models_active.models[message.chat.id].last_answer = message.reply_to_message.text[-6:]
     except IndexError:
         text = 'Недостаточно данных для генерациии сообщений.\
                 \nБот учится на ваших сообщениях, напишите что-нибудь!'
@@ -81,12 +81,12 @@ async def message_processing_group_replied(message: types.Message):
         models_active.check_model_exists(message.chat.id)
     try:
         text = models_active.models[message.chat.id].generate_answer(message=message.text, answer_chance=1)
-        models_active.models[message.chat.id].last_answer = text[-6:]
+        models_active.models[message.chat.id].last_answer = message.reply_to_message.text[-6:]
     except IndexError:
         text = 'Недостаточно данных для генерациии сообщений.\
                 \nБот учится на ваших сообщениях, напишите что-нибудь!'
     models_active.models[message.chat.id].parse_and_add(text=message.text)
-    logging.info('This is a reply')
+    logging.info(message.reply_to_message.text)
     db.msg_insert_or_update(chatid=message.chat.id,
                             userid=message.from_user.id,
                             message=message.text,
