@@ -106,7 +106,7 @@ class Markov:
         :param primer: string to elongate
         :param ignore_none: if True - elongate, ignoring text endings
         :param strict: if True - elongate even if primer can't be found in matrix
-        :param rand_coef: optional, provide rand_coeff
+        :param rand_coeff: optional, provide rand_coeff
         :return: tuple (elongated primer, is_end_of_text)
         """
         if not rand_coeff:
