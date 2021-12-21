@@ -1,9 +1,9 @@
 import logging
 import random
-import sqlite3
+from database.db_manager import msg_get_cursor, anek_get_cursor
 # import asyncio
 from time import time
-from app.app import config
+# from app.app import config
 
 
 class Markov:
@@ -14,6 +14,7 @@ class Markov:
         last_text - last characters of last added text
         rand_coeff - chance of random (non-statistical) elongation (in promille)
     """
+
     def __init__(self, order: int = None, rand_coeff: int = 10):
         """
         :param order: size of chain's window
@@ -25,23 +26,23 @@ class Markov:
         else:
             self.windows = [order, 9, 6, 3, 1]
         self.N = self.windows[0]
+        self.last_answer = None
         self.last_text = ' ' * self.N
         # last_text good for answer generations or if model was learned on separate sentences
         self.rand_coeff = rand_coeff
 
-    def _make_pairs(self, text: str, last_text_enabled: bool) -> tuple[str, str]:
+    def _make_pairs(self, text: str) -> tuple[str, str]:
         """
         Generator function; Makes "key sequence - next character" pairs
         :param text: text to analyze
-        :param last_text_enabled: enable last_text parameter
         :return: tuple (key_seq, next_char)
         """
-        if last_text_enabled is True:
+        if self.last_answer:
             for n in self.windows:
                 if len(text) >= n:
                     yield '_START', text[:n]
-                    text = (self.last_text + ' ' + text).strip()
-                    self.last_text = text[-n:]
+                    text = ' '.join([self.last_answer, text]).strip()
+                    self.last_answer = text[-n:]
                     break
                 else:
                     continue
@@ -49,6 +50,8 @@ class Markov:
             for n in self.windows:
                 if len(text) >= n:
                     yield '_START', text[:n]
+                    text = ' '.join([self.last_text, text]).strip()
+                    self.last_text = text[-n:]
                     break
                 else:
                     continue
@@ -65,13 +68,12 @@ class Markov:
             else:
                 continue
 
-    def parse_and_add(self, text: str, last_text_enabled: bool = True):
+    def parse_and_add(self, text: str):
         """
         Makes pairs from text and adds them to statistic matrix
         :param text: text to analyze
-        :param last_text_enabled: enable last_text in model
         """
-        for i in self._make_pairs(text, last_text_enabled):
+        for i in self._make_pairs(text):
             try:
                 self.matrix[i[0]][i[1]] += 1
             except KeyError:
@@ -93,17 +95,25 @@ class Markov:
                         \nБот учится на ваших сообщениях, напишите что-нибудь!'
         return primer
 
-    def _elongate(self, primer: str, ignore_none=False, strict=False) -> tuple[str, bool]:
+    def _elongate(self,
+                  primer: str,
+                  ignore_none: bool = False,
+                  strict: bool = False,
+                  rand_coeff=None
+                  ) -> tuple[str, bool]:
         """
         Elongates the given primer by 1 char
         :param primer: string to elongate
         :param ignore_none: if True - elongate, ignoring text endings
         :param strict: if True - elongate even if primer can't be found in matrix
+        :param rand_coef: optional, provide rand_coeff
         :return: tuple (elongated primer, is_end_of_text)
         """
+        if not rand_coeff:
+            rand_coeff = self.rand_coeff
         for n in self.windows:
             try:
-                if random.randint(0, 1000) > self.rand_coeff:
+                if random.randint(0, 1000) > rand_coeff:
                     next_char = random.choices(list(self.matrix[primer[-n:]].keys()),
                                                list(self.matrix[primer[-n:]].values()))[0]
                 else:
@@ -132,9 +142,9 @@ class Markov:
             else:
                 return primer, True
 
-    def format_text(self, text):
+    def format_text(self, text: str):
         text = text.strip()
-        return ''.join([text[0].upper(), text[1:]])
+        return ''.join([text[:1].upper(), text[1:]])
 
     def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500) -> str:
         """
@@ -188,18 +198,22 @@ class Model(Markov):
         self.last_answer_time = time()
         self.is_main = is_main
 
-    def generate_answer(self, message: str):
+    def generate_answer(self, message: str, answer_chance=None, rand_coeff=None):
         """
         Generates an answer text, takes message as primer
+        :param answer_chance: optional, provide answer_chance
+        :param rand_coeff: optional, provide rand_coeff
         :param message: text of message to answer
         :return: text of answer
         """
         message += ' '
-        if random.random() < self.answer_chance:
+        if not answer_chance:
+            answer_chance = self.answer_chance
+        if random.random() < answer_chance:
             for n in self.windows:
                 if len(message) >= n:
                     string = message[-n:]
-                    string = self.generate(string=string, strict=True)
+                    string = self.generate(string=string, strict=True, rand_coeff=rand_coeff)
                     string = string[n:]
                     self.last_answer_time = time()
                     return self.format_text(string)
@@ -234,40 +248,41 @@ class Manager:
     Class for create and manage multiple Markov chain models
         models - dict of models, keys are model names
     """
+
     def __init__(self):
         self.models = {}
 
-    def init_model(self, modelname: str, path: str, *query, last_text_enabled: bool = True,  **kwargs):
-        """
-        Creates model and trains it on database contents
-        :param modelname: name of model
-        :param path: path to database
-        :param query: SQL query and substitutions dict
-        :param last_text_enabled: enable last_text in model
-        :param kwargs: kwargs to Model.__init__()
-        """
-        conn = sqlite3.connect(path)
-        cursor = conn.cursor()
-        cursor.execute(*query)
-
-        self.models[modelname] = Model(**kwargs)
-        logging.info(f'Parsing {path}: Started...')
-        for elem in [i[0] for i in cursor.fetchall()]:
-            self.models[modelname].parse_and_add(elem, last_text_enabled)
-        logging.info(f'Parsing {path}: Completed')
+    def init_msg_model(self, chatid: int, modelname=None, **kwargs):
+        cursor = msg_get_cursor()
+        statement = "SELECT message, last_ans FROM messages " \
+                    "WHERE chatid = :chatid " \
+                    "ORDER BY time ASC"
+        cursor.execute(statement,
+                       {"chatid": chatid})
+        if modelname:
+            self.models[modelname] = Model(**kwargs)
+        else:
+            self.models[chatid] = Model(**kwargs)
+        logging.info(f'Parsing chatid={chatid}: Started...')
+        for elem in [i for i in cursor.fetchall()]:
+            self.models[modelname].last_answer = elem[1]
+            self.models[modelname].parse_and_add(elem[0])
+        logging.info(f'Parsing: Completed')
         logging.info(f'Model is ready')
 
-    def init_chat_model(self, chatid: str):
-        """
-        Creates a model for using in common chat
-        :param chatid: chatid, will be a name of model
-        """
-        self.init_model(chatid,
-                        config.database.messages_path,
-                        '''SELECT message FROM texts WHERE userid = :userid''',
-                        {'userid': chatid})
+    def init_anek_model(self, **kwargs):
+        cursor = anek_get_cursor()
+        statement = "SELECT anek FROM aneks;"
+        cursor.execute(statement)
+        self.models["ANEKS"] = Model(**kwargs)
+        logging.info(f'Parsing ANECDOTES: Started...')
+        for elem in [i[0] for i in cursor.fetchall()]:
+            self.models["ANEKS"].last_answer = ' '
+            self.models["ANEKS"].parse_and_add(elem)
+        logging.info(f'Parsing ANECDOTES: Completed')
+        logging.info(f'Model is ready')
 
-    def check_model_exists(self, chatid: str):
+    def check_model_exists(self, chatid):
         """
         Checks if chat model exists, if not - creates it
         :param chatid: chatid or name of model
@@ -275,7 +290,7 @@ class Manager:
         try:
             self.models[chatid]
         except KeyError:
-            self.init_chat_model(chatid)
+            self.init_msg_model(chatid, chatid)
 
 
 models_active = Manager()

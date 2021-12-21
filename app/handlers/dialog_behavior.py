@@ -1,9 +1,9 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import filters
 from aiogram.utils import exceptions
-
+from time import time
 from app.app import models_active, config
-import database.db as db
+import database.db_manager as db
 
 
 async def command_anek(message: types.Message):
@@ -12,9 +12,18 @@ async def command_anek(message: types.Message):
 
 
 async def message_processing_mainchat(message: types.Message):
-    db.insert_or_update(userid=message.chat.id, message=message.text)
+    try:
+        text = models_active.models[message.chat.id].generate_answer(message=message.text)
+        models_active.models[message.chat.id].last_answer = text[-models_active.models[message.chat.id].N:]
+    except IndexError:
+        text = 'Недостаточно данных для генерациии сообщений.\
+                                    \nБот учится на ваших сообщениях, напишите что-нибудь!'
     models_active.models[message.chat.id].parse_and_add(text=message.text)
-    text = models_active.models[message.chat.id].generate_answer(message=message.text)
+    db.msg_insert_or_update(chatid=message.chat.id,
+                            userid=message.from_user.id,
+                            message=message.text,
+                            timestamp=time(),
+                            last_ans=models_active.models[message.chat.id].last_answer)
     try:
         await message.bot.send_message(chat_id=message.chat.id, text=text)
     except exceptions.MessageTextIsEmpty:
@@ -22,12 +31,22 @@ async def message_processing_mainchat(message: types.Message):
 
 
 async def message_processing_group(message: types.Message):
-    db.insert_or_update(userid=message.chat.id, message=message.text)
     try:
-        models_active.models[message.chat.id].parse_and_add(text=message.text)
+        models_active.models[message.chat.id]
     except KeyError:
         models_active.check_model_exists(message.chat.id)
-    text = models_active.models[message.chat.id].generate_answer(message=message.text)
+    try:
+        text = models_active.models[message.chat.id].generate_answer(message=message.text)
+        models_active.models[message.chat.id].last_answer = text[-models_active.models[message.chat.id].N:]
+    except IndexError:
+        text = 'Недостаточно данных для генерациии сообщений.\
+                                    \nБот учится на ваших сообщениях, напишите что-нибудь!'
+    models_active.models[message.chat.id].parse_and_add(text=message.text)
+    db.msg_insert_or_update(chatid=message.chat.id,
+                            userid=message.from_user.id,
+                            message=message.text,
+                            timestamp=time(),
+                            last_ans=models_active.models[message.chat.id].last_answer)
     try:
         await message.bot.send_message(chat_id=message.chat.id, text=text)
     except exceptions.MessageTextIsEmpty:
@@ -35,8 +54,9 @@ async def message_processing_group(message: types.Message):
 
 
 async def message_processing_pm(message: types.Message):
-    db.insert_or_update(userid=message.chat.id, message=message.text)
-    text = models_active.models['PM_MODEL'].generate_answer(message=message.text)
+    text = models_active.models[config.admin_ids.admin_group_id].generate_answer(message=message.text,
+                                                                                 answer_chance=1,
+                                                                                 rand_coeff=10)
     await message.bot.send_message(chat_id=message.chat.id, text=text)
 
 

@@ -53,4 +53,5 @@ def load_config(path: str):
         )
     )
 
+
 config = load_config("config/bot.ini")
