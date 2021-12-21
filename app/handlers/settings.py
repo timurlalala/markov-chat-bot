@@ -74,6 +74,8 @@ async def gsm_show_values(message: types.Message, state: FSMContext):
     ac = models_active.models[message.chat.id].get_answer_chance()
     text = f'rand_coeff = {rc/10} \nanswer_chance = {ac*100}'
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
+    await state.finish()
+
 
 # handlers for bot management settings
 async def asm_start(message: types.Message):
