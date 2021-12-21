@@ -80,12 +80,12 @@ async def message_processing_group_replied(message: types.Message):
     except KeyError:
         models_active.check_model_exists(message.chat.id)
     try:
-        text = models_active.models[message.chat.id].generate_answer(message=message.text)
+        text = models_active.models[message.chat.id].generate_answer(message=message.text, answer_chance=1)
         models_active.models[message.chat.id].last_answer = text[-6:]
     except IndexError:
         text = 'Недостаточно данных для генерациии сообщений.\
                 \nБот учится на ваших сообщениях, напишите что-нибудь!'
-    models_active.models[message.chat.id].parse_and_add(text=message.text, answer_chance=1)
+    models_active.models[message.chat.id].parse_and_add(text=message.text)
     logging.info('This is a reply')
     db.msg_insert_or_update(chatid=message.chat.id,
                             userid=message.from_user.id,
