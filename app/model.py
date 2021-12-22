@@ -212,10 +212,10 @@ class Model(Markov):
             for n in self.windows:
                 if len(message) >= n:
                     primer = message[-(n+1):]
-                    logging.info(primer)
+                    # logging.info(primer)
                     string = self.generate(string=primer, strict=True, rand_coeff=rand_coeff)
-                    logging.info(string)
-                    logging.info(n)
+                    # logging.info(string)
+                    # logging.info(n)
                     string = string[n:]
                     self.last_answer_time = time()
                     return self.format_text(string)
