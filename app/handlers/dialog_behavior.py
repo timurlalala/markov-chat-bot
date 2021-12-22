@@ -105,7 +105,7 @@ async def message_processing_group_replied(message: types.Message):
 async def message_processing_pm(message: types.Message):
     text = models_active.models[config.admin_ids.admin_group_id].generate_answer(message=message.text,
                                                                                  answer_chance=1,
-                                                                                 rand_coeff=10)
+                                                                                 rand_coeff=0.01)
     await message.bot.send_message(chat_id=message.chat.id, text=text)
 
 
