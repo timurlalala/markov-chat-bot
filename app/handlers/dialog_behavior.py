@@ -45,6 +45,7 @@ async def message_processing_mainchat_replied(message: types.Message):
         text = 'Недостаточно данных для генерациии сообщений.\
                 \nБот учится на ваших сообщениях, напишите что-нибудь!'
     models_active.models[message.chat.id].parse_and_add(text=message.text)
+    logging.info(message.reply_to_message.from_user.id)
     db.msg_insert_or_update(chatid=message.chat.id,
                             userid=message.from_user.id,
                             message=message.text,
