@@ -72,7 +72,7 @@ async def gsm_show_values(message: types.Message, state: FSMContext):
     models_active.check_model_exists(message.chat.id)
     rc = models_active.models[message.chat.id].get_rand_coeff()
     ac = models_active.models[message.chat.id].get_answer_chance()
-    text = f'rand_coeff = {rc/10} \nanswer_chance = {ac*100}'
+    text = f'rand_coeff = {rc*100} \nanswer_chance = {ac*100}'
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 

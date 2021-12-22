@@ -15,7 +15,7 @@ class Markov:
         rand_coeff - chance of random (non-statistical) elongation (in promille)
     """
 
-    def __init__(self, order: int = None, rand_coeff: int = 10):
+    def __init__(self, order: int = None, rand_coeff=0.01):
         """
         :param order: size of chain's window
         :param rand_coeff: coefficient of random
@@ -42,7 +42,6 @@ class Markov:
                 if len(text) >= n:
                     yield '_START', text[:n]
                     text = ' '.join([self.last_answer, text]).strip()
-                    self.last_answer = text[-n:]
                     break
                 else:
                     continue
@@ -113,7 +112,7 @@ class Markov:
             rand_coeff = self.rand_coeff
         for n in self.windows:
             try:
-                if random.randint(0, 1000) > rand_coeff:
+                if random.random() > rand_coeff:
                     next_char = random.choices(list(self.matrix[primer[-n:]].keys()),
                                                list(self.matrix[primer[-n:]].values()))[0]
                 else:
@@ -187,7 +186,7 @@ class Model(Markov):
         last_answer_time - timestamp of the last answer
     """
 
-    def __init__(self, order: int = None, rand_coeff: int = 10, is_main: bool = False):
+    def __init__(self, order: int = None, rand_coeff=0.01, is_main: bool = False):
         """
         :param order: size of chain's window
         :param rand_coeff: coefficient of random
@@ -206,14 +205,16 @@ class Model(Markov):
         :param message: text of message to answer
         :return: text of answer
         """
-        message += ' '
         if not answer_chance:
             answer_chance = self.answer_chance
         if random.random() < answer_chance:
             for n in self.windows:
                 if len(message) >= n:
-                    string = message[-n:]
-                    string = self.generate(string=string, strict=True, rand_coeff=rand_coeff)
+                    primer = message[-n:]
+                    logging.info(primer)
+                    string = self.generate(string=primer, strict=True, rand_coeff=rand_coeff)
+                    logging.info(string)
+                    logging.info(n)
                     string = string[n:]
                     self.last_answer_time = time()
                     return self.format_text(string)
@@ -228,7 +229,7 @@ class Model(Markov):
         :param rand_coeff: new rand_coeff to set
         :return: success message
         """
-        self.rand_coeff = rand_coeff * 10
+        self.rand_coeff = rand_coeff / 100
         self.last_answer_time = time()
         return "Успешно"
 
