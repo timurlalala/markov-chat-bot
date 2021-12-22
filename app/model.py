@@ -205,16 +205,17 @@ class Model(Markov):
         :param message: text of message to answer
         :return: text of answer
         """
+        message += ' '
         if not answer_chance:
             answer_chance = self.answer_chance
         if random.random() < answer_chance:
             for n in self.windows:
                 if len(message) >= n:
-                    primer = message[-n:]
-                    # logging.info(primer)
+                    primer = message[-(n+1):]
+                    logging.info(primer)
                     string = self.generate(string=primer, strict=True, rand_coeff=rand_coeff)
-                    # logging.info(string)
-                    # logging.info(n)
+                    logging.info(string)
+                    logging.info(n)
                     string = string[n:]
                     self.last_answer_time = time()
                     return self.format_text(string)
