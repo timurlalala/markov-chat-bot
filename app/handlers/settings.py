@@ -17,7 +17,7 @@ class AdminSettingsMenu(StatesGroup):
     asm_waiting_for_option = State()
 
 
-gsm_options = ('answer_chance', 'rand_coeff', '*показать_параметры*','/cancel')
+gsm_options = ('answer_chance', 'rand_coeff', '*показать_параметры*', '/cancel')
 asm_options = ('*update bot*', '*show status*', '*last update log*', '/cancel')
 
 

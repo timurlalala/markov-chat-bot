@@ -20,7 +20,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 def run():
     logging.basicConfig(level=logging.INFO)
 
-    models_active.init_anek_model(order=12,
+    models_active.init_anek_model(order=15,
                                   rand_coeff=0.001,
                                   is_main=True)
 
