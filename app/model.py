@@ -158,7 +158,7 @@ class Markov:
         if string is None:
             string = self._get_primer()
         is_end_of_text = False
-        for _ in range(length):
+        while len(string) < length:
             if is_end_of_text is False:
                 string, is_end_of_text = self._elongate(string, **kwargs)
             else:
