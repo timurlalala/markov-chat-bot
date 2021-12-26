@@ -9,7 +9,7 @@ import database.db_manager as db
 
 
 async def command_anek(message: types.Message):
-    text = models_active.models['ANEKS'].generate_l()
+    text = models_active.models['ANEKS'].generate_l(ignore_none=True)
     await message.bot.send_message(chat_id=message.chat.id, text=text)
 
 

@@ -145,7 +145,7 @@ class Markov:
         text = text.strip()
         return ''.join([text[:1].upper(), text[1:]])
 
-    def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500) -> str:
+    def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500, **kwargs) -> str:
         """
         Generates text from primer string (if given) within specified length borders
         Sometimes text may be slightly longer than lengthmax
@@ -159,10 +159,13 @@ class Markov:
             string = self._get_primer()
         is_end_of_text = False
         for _ in range(length):
-            string, is_end_of_text = self._elongate(string, ignore_none=True)
+            if is_end_of_text is False:
+                string, is_end_of_text = self._elongate(string, **kwargs)
+            else:
+                break
         else:
             while (string[-1] not in ['.', '!', '?']) and (is_end_of_text is False):
-                string, is_end_of_text = self._elongate(string)
+                string, is_end_of_text = self._elongate(string, **kwargs)
         return self.format_text(string)
 
     def generate(self, string: str = None, **kwargs) -> str:
@@ -213,7 +216,11 @@ class Model(Markov):
                 if len(message) >= n:
                     primer = message[-(n+1):]
                     # logging.info(primer)
-                    string = self.generate(string=primer, strict=True, rand_coeff=rand_coeff)
+                    string = self.generate_l(string=primer,
+                                             lengthmax=350,
+                                             ignore_none=False,
+                                             strict=True,
+                                             rand_coeff=rand_coeff)
                     # logging.info(string)
                     # logging.info(n)
                     string = string[n:]
