@@ -217,7 +217,7 @@ class Model(Markov):
                     primer = message[-(n+1):]
                     # logging.info(primer)
                     string = self.generate_l(string=primer,
-                                             lengthmax=350,
+                                             lengthmax=250,
                                              ignore_none=False,
                                              strict=True,
                                              rand_coeff=rand_coeff)
