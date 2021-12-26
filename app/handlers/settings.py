@@ -60,10 +60,10 @@ async def gsm_set_ac(message: types.Message, state: FSMContext):
 
 async def gsm_set_rc(message: types.Message, state: FSMContext):
     try:
-        text = models_active.models[message.chat.id].set_rand_coeff(int(message.text))
+        text = models_active.models[message.chat.id].set_rand_coeff(float(message.text))
     except KeyError:
         models_active.check_model_exists(message.chat.id)
-        text = models_active.models[message.chat.id].set_rand_coeff(int(message.text))
+        text = models_active.models[message.chat.id].set_rand_coeff(float(message.text))
     await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
