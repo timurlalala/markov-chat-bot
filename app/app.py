@@ -20,9 +20,14 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 def run():
     logging.basicConfig(level=logging.INFO)
 
-    models_active.init_anek_model(order=12,
-                                  rand_coeff=0.001,
-                                  is_main=True)
+    try:
+        with open('ANEKS.json', 'r') as f:
+            pass
+        models_active.load_from_json("ANEKS")
+    except FileNotFoundError:
+        models_active.init_anek_model(order=12,
+                                      rand_coeff=0.001,
+                                      is_main=True)
 
     models_active.init_msg_model(config.admin_ids.admin_group_id,
                                  is_main=True)

@@ -1,7 +1,7 @@
 import logging
 import random
 from database.db_manager import msg_get_cursor, anek_get_cursor
-# import asyncio
+import json
 from time import time
 # from app.app import config
 
@@ -310,6 +310,31 @@ class Manager:
             self.models[chatid]
         except KeyError:
             self.init_msg_model(chatid, chatid)
+
+    def dump_to_json(self, modelname):
+        data = {'order': self.models[modelname].N,
+                'rand_coeff': self.models[modelname].rand_coeff,
+                'is_main': self.models[modelname].is_main,
+                'matrix': self.models[modelname].matrix}
+        with open(f'database/{modelname}.json', 'w') as file:
+            json.dump(data, file)
+        return 'Success'
+
+    def load_from_json(self, modelname):
+        try:
+            with open(f'database/{modelname}.json', 'r') as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            return 'File Not Found. Aborting'
+        order = data['order']
+        if order == 9:
+            order = None
+        rand_coeff = data['rand_coeff']
+        is_main = data['is_main']
+        self.models[modelname] = Model(order, rand_coeff, is_main)
+        self.models[modelname].matrix = data['matrix']
+        return 'Success'
+
 
 
 models_active = Manager()

@@ -26,7 +26,7 @@ asm_start_options = ('*update bot*',
                      '*last update log*',
                      '*aneks settings*',
                      '/cancel')
-asm_anek_options = ('rand_coeff', 'order', '*показать параметры*', '/cancel')
+asm_anek_options = ('rand_coeff', 'order', '*показать параметры*', '*dump*', '/cancel')
 
 
 # handlers for group chat settings
@@ -170,6 +170,12 @@ async def asm_anek_show_values(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+async def asm_anek_dump(message: types.Message, state: FSMContext):
+    text = models_active.dump_to_json("ANEKS")
+    await message.reply(text, reply_markup=types.ReplyKeyboardRemove())
+    await state.finish()
+
+
 # registering handlers
 def register_handlers_settings(dp: Dispatcher):
     # gsm handlers registering
@@ -228,6 +234,9 @@ def register_handlers_settings(dp: Dispatcher):
                                 state=AdminSettingsMenu.asm_wait_for_anek_order)
     dp.register_message_handler(asm_anek_show_values,
                                 filters.Text('*показать параметры*'),
+                                state=AdminSettingsMenu.asm_wait_for_anek_option)
+    dp.register_message_handler(asm_anek_dump,
+                                filters.Text('*dump*'),
                                 state=AdminSettingsMenu.asm_wait_for_anek_option)
     dp.register_message_handler(asm_update_log,
                                 filters.ChatTypeFilter(types.ChatType.PRIVATE),
