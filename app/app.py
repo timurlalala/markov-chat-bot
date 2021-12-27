@@ -21,7 +21,7 @@ def run():
     logging.basicConfig(level=logging.INFO)
 
     try:
-        with open('ANEKS.json', 'r') as f:
+        with open('database/ANEKS.json', 'r') as f:
             pass
         models_active.load_from_json("ANEKS")
     except FileNotFoundError:

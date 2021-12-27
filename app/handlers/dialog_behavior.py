@@ -10,7 +10,11 @@ import database.db_manager as db
 
 
 async def command_anek(message: types.Message):
-    text = models_active.models['ANEKS'].generate_l(ignore_none=False)
+    args = message.get_args()
+    if args:
+        text = models_active.models['ANEKS'].generate_l(string=args, strict=True, ignore_none=True)
+    else:
+        text = models_active.models['ANEKS'].generate_l(ignore_none=True)
     await message.bot.send_message(chat_id=message.chat.id, text=text)
 
 
@@ -20,7 +24,7 @@ async def command_gen_mess_group(message: types.Message):
     except KeyError:
         models_active.check_model_exists(message.chat.id)
     args = message.get_args()
-    logging.info(args)
+    # logging.info(f'type: {type(args)}')
     if args:
         try:
             text = models_active.models[message.chat.id].generate_l(string=args,
