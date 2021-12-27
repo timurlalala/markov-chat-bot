@@ -251,6 +251,9 @@ class Model(Markov):
         self.last_answer_time = time()
         return "Успешно"
 
+    def get_order(self):
+        return self.N
+
     def get_rand_coeff(self):
         return self.rand_coeff
 
