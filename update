@@ -1,5 +1,6 @@
 #!/bin/bash
 cd /home/timursam00/markov-chat-bot
 git pull > /home/timursam00/markov-chat-bot/update.txt
+sleep 5
 systemctl stop markovbot
 systemctl start markovbot
