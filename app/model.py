@@ -26,7 +26,7 @@ class Markov:
         else:
             self.windows = [order, 9, 6, 3, 1]
         self.N = self.windows[0]
-        self.w_w = [i**3 for i in self.windows]
+        self.w_w = [i**5 for i in self.windows]
         self.w_i = [i for i in range(len(self.windows))]
         self.last_answer = None
         self.last_text = ' ' * self.N
