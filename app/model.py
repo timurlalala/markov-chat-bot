@@ -26,6 +26,8 @@ class Markov:
         else:
             self.windows = [order, 9, 6, 3, 1]
         self.N = self.windows[0]
+        self.w_w = [i**3 for i in self.windows]
+        self.w_i = [i for i in range(len(self.windows))]
         self.last_answer = None
         self.last_text = ' ' * self.N
         # last_text good for answer generations or if model was learned on separate sentences
@@ -110,13 +112,14 @@ class Markov:
         """
         if not rand_coeff:
             rand_coeff = self.rand_coeff
-        for n in self.windows:
+        ind = random.choices(self.w_i, self.w_w)[0]
+        for n in self.windows[ind:]:
             try:
                 if random.random() > rand_coeff:
                     next_char = random.choices(list(self.matrix[primer[-n:]].keys()),
                                                list(self.matrix[primer[-n:]].values()))[0]
                 else:
-                    next_char = random.choice(list(self.matrix[random.choice(list(self.matrix.keys()))].keys()))
+                    next_char = random.choice(list(self.matrix[primer[-n:]].keys()))
 
                 if next_char is None:
                     if ignore_none is False:
