@@ -6,6 +6,11 @@ from time import time
 # from app.app import config
 
 
+def format_text(text: str):
+    text = text.strip()
+    return ''.join([text[:1].upper(), text[1:]])
+
+
 class Markov:
     """
     Class for Markov chain logic
@@ -119,7 +124,7 @@ class Markov:
                     next_char = random.choices(list(self.matrix[primer[-n:]].keys()),
                                                list(self.matrix[primer[-n:]].values()))[0]
                 else:
-                    next_char = random.choice(list(self.matrix[primer[-n:]].keys()))
+                    next_char = random.choice(list(self.matrix[primer[-1:]].keys()))
 
                 if next_char is None:
                     if ignore_none is False:
@@ -144,10 +149,6 @@ class Markov:
             else:
                 return primer, True
 
-    def format_text(self, text: str):
-        text = text.strip()
-        return ''.join([text[:1].upper(), text[1:]])
-
     def generate_l(self, string: str = None, lengthmin: int = 1, lengthmax: int = 500, **kwargs) -> str:
         """
         Generates text from primer string (if given) within specified length borders
@@ -169,7 +170,7 @@ class Markov:
         else:
             while (string[-1] not in ['.', '!', '?']) and (is_end_of_text is False):
                 string, is_end_of_text = self._elongate(string, **kwargs)
-        return self.format_text(string)
+        return format_text(string)
 
     def generate(self, string: str = None, **kwargs) -> str:
         """
@@ -182,7 +183,7 @@ class Markov:
         is_end_of_text = False
         while is_end_of_text is False:
             string, is_end_of_text = self._elongate(string, **kwargs)
-        return self.format_text(string)
+        return format_text(string)
 
 
 class Model(Markov):
@@ -228,7 +229,7 @@ class Model(Markov):
                     # logging.info(n)
                     string = string[n:]
                     self.last_answer_time = time()
-                    return self.format_text(string)
+                    return format_text(string)
                 else:
                     continue
         else:
@@ -337,7 +338,6 @@ class Manager:
         self.models[modelname] = Model(order, rand_coeff, is_main)
         self.models[modelname].matrix = data['matrix']
         return 'Success'
-
 
 
 models_active = Manager()
